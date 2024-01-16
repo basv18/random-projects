@@ -1,0 +1,84 @@
+#This is a Python code
+#This is a small snippet of a code I created that uses results from a NoSQL database to create the personal radiation dose record required by the HSE
+#These reports have very specific formating. Each report contains thousands of personal doses that need to be grouped by certain parameters. 
+
+
+
+#Formats dates
+df2['Allocation Start'] = list(map(lambda x: datetime.datetime.strptime(x,'%Y-%m-%d')\
+.strftime('%d-%m-%Y'), df2['Allocation Start']))
+df2['Allocation End'] = list(map(lambda x: datetime.datetime.strptime(x,'%Y-%m-%d')\
+.strftime('%d-%m-%Y'), df2['Allocation End']))
+
+
+#Puts correct spaces in doses rows 
+char = ' '
+df['Type'] = df2["Type"].str.ljust(1, char)
+#df2['Row'] = df2["Row"].str.ljust(1, char) #probably not needed
+df2['Flag'] = df2["Flag"].str.ljust(2, char)
+df2["Period"]= df2["Period"].str.ljust(2, char)
+df2["National Insurance Number"]= df2["National Insurance Number"].str.ljust(8, char)
+df2['Allocation Start'] = df2["Allocation Start"].str.ljust(8, char)
+df2['Allocation End'] = df2["Allocation End"].str.ljust(13, char)
+df2['Dose Type'] = df2["Dose Type"].str.ljust(4, char)
+df2['Body'] = df2['Body'].str.ljust(4, char)
+df2['WB Hp(10)'] = df2['WB Hp(10)'].str.ljust(8, char)
+df2['Dose Type 2'] = df2["Dose Type 2"].str.ljust(4, char)
+df2['Skin'] = df2['Skin'].str.ljust(4, char)
+df2['Skin Hp(0.07)'] = df2['Skin Hp(0.07)'].str.ljust(8, char)
+df2['Dose Type 3'] = df2["Dose Type 3"].str.ljust(4, char)
+df2['Ext'] = df2['Ext'].str.ljust(4, char)
+df2['Ext Hp(0.07)'] = df2['Ext Hp(0.07)'].str.ljust(8, char)
+df2['Dose Type 4'] = df2["Dose Type 4"].str.ljust(4, char)
+df2['Eyes'] = df2['Eyes'].str.ljust(4, char)
+df2['Eyes Hp(3)'] = df2['Eyes Hp(3)'].str.ljust(8, char)
+
+life['Type'] = life["Type"].str.ljust(1, char)
+life['Flag'] = life["Flag"].str.ljust(2, char)
+life["Period"]= life["Period"].str.ljust(2, char)
+life["National Insurance Number"]= life["National Insurance Number"].str.ljust(8, char)
+life['Allocation Start'] = life["Allocation Start"].str.ljust(8, char)
+life['Allocation End'] = life["Allocation End"].str.ljust(11, char)
+life['Dose Type'] = life["Dose Type"].str.ljust(4, char)
+life['Body'] = life['Body'].str.ljust(4, char)
+life['WB Hp(10)'] = life['WB Hp(10)'].str.ljust(8, char)
+life['Dose Type 2'] = life["Dose Type 2"].str.ljust(4, char)
+life['Skin'] = life['Skin'].str.ljust(4, char)
+life['Skin Hp(0.07)'] = life['Skin Hp(0.07)'].str.ljust(8, char)
+life['Dose Type 3'] = life["Dose Type 3"].str.ljust(4, char)
+life['Ext'] = life['Ext'].str.ljust(4, char)
+life['Ext Hp(0.07)'] =life['Ext Hp(0.07)'].str.ljust(8, char)
+life['Dose Type 4'] = life["Dose Type 4"].str.ljust(4, char)
+life['Eyes'] = life['Eyes'].str.ljust(4, char)
+life['Eyes Hp(3)'] = life['Eyes Hp(3)'].str.ljust(8, char)
+
+
+
+#Groups doses for each wearer---------------------------------------------------------------------------------
+grouped = df2.groupby("National Insurance Number", as_index = False) #group by is done based on wearer's NIN
+grouped_index = grouped.apply(lambda x: x.reset_index(drop = True)).reset_index()
+result = grouped_index.drop('level_0',axis = 1).set_index('level_1')
+result['Row'] = result.index + 3
+
+result = result[result['Row'] < 8 ] #YEY! this makes sure only the last 5 doses appear but keeps the lifetime dose as an historic sum
+
+
+
+#attaches all the row types together per wearer
+fim = np.empty(19, dtype = str) #creates long enough row that has space for all the info needed
+details = details.to_numpy()
+doses = result.to_numpy()
+life = life.to_numpy()
+
+
+
+for row in details:
+    fim = np.vstack((fim, row))
+    for row2 in life: #if litetime NIN matches the details NIN, attach lifetime dose to the details 
+        if row[5] == row2[4]:
+            fim = np.vstack((fim,row2))
+    for row3 in doses: #if doses NIN matches the details NIN, attach single doses to the details (+ lifetime dose)
+        if row[5] == row3[4]:
+            fim = np.vstack((fim, row3))
+          
+dff = pd.DataFrame(fim)
