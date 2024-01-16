@@ -1,0 +1,36 @@
+#Let's say you go to play bingo with your friends and you really really really want to win.
+#Use a simulation of 10 random games to see if any number in your card tends to come out more than once in the 25.
+#If the number is in the first 25 more than once, then it has a higher chance of being called out early.
+#And you obv want the card whose numbers are called out early in the game!
+
+import numpy as np
+import pandas as pd
+
+sqr = 99
+plays = 10
+x = 25
+def balls_order(sqr):
+    balls = np.random.random_integers(99, size = 99)
+    first_quarter = np.random.choice(balls,25)
+    return first_quarter
+
+def bingo_simulation(plays):
+    results = np.empty(25, dtype = int)
+    for n in range(plays):
+        outcome = balls_order(sqr)
+        results = np.vstack((results, outcome))
+        
+    return results
+
+def outputs(x): #output includes the card with the biggest amount of numbers that are called before the 25th 
+    best_card = np.empty(1, dtype = int)
+    for n in range(x):
+        lst = np.array(bingo_simulation(plays))
+        maxi = np.argmax(np.bincount(lst.flat))
+        if maxi in best_card[:]:
+            print(maxi, ' repeats.')
+        else:
+            best_card = np.vstack((best_card, maxi))
+    return best_card
+print(outputs(x))
+
