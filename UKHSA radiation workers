@@ -1,0 +1,32 @@
+#This is a Python Code
+#I use this code for analysing thousands of TLDs. 
+#I group the TLDs by wearer to find their annual dose, and then group by profession, body part and dose.
+#This way we can analyse how many wearers got each dose value.
+#This code was used to do data analysis for the upcoming UKHSA report on radiation received by radiation workers.
+
+#Import packages
+import csv
+import datetime
+import os
+import pandas as pd
+import time
+import numpy as np
+
+df = pd.read_csv('2017.csv')
+df = df[['Period','w-code','practice','profession', 'O-name','Dose-char']]
+df['Practice'] = df['practice']
+df['Occupation'] = df['profession']
+df['Organ'] = df['O-name']
+df['Dose'] = df['Dose-char']
+df['Dose'] = df['Dose'].str.replace('*','0')
+
+df['Dose'] = df['Dose'].astype(float)
+
+
+#wearer = df.groupby(['w-code'])['Dose'].sum()
+#wearer.to_csv('toweare.csv', index=False)
+
+occ_dose = df.groupby(['w-code','Practice','Occupation','Organ'])['Dose'].sum().reset_index()
+occ_dose.to_csv('2017FullDatav2.csv', index=False)
+
+print(occ_dose)
