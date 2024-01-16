@@ -1,0 +1,96 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+#I am considering that a person opens 3 packs of 9 cards each every month.
+
+x = input('What type of card? The rarities are common, rare, super, ultra, secret, ultimate or ghost. ')
+total_cards = 9
+n_packs_month = 3
+n_months = 12
+n_times = n_packs_month * n_months
+n_people = 1000
+
+def play_yg(): #possabilities when opening yugioh packs
+
+    common_prob = (8/9) #1728
+    super_prob = (1/54) #36
+    ultra_prob = (1/108) #18
+    secret_prob = (1/216) #9
+    ultimate_prob = (1/432) #4.5
+    ghost_prob = (1/1944)
+    rare_prob = 1- (common_prob + super_prob + ultra_prob + secret_prob + ultimate_prob + ghost_prob)
+
+    possible_outcomes = ['common', 'rare', 'super', 'ultra', 'secret', 'ultimate', 'ghost']
+    probabilities = [common_prob, rare_prob, super_prob, ultra_prob, secret_prob, ultimate_prob, ghost_prob]
+
+    outcome = np.random.choice(possible_outcomes,total_cards, p=probabilities)
+    return outcome
+
+
+def perform_simulation(x, n_times): #simulation of one person opening packs
+    common = 0
+    rare = 0
+    superc = 0
+    ultra = 0
+    secret = 0
+    ultimate = 0
+    ghost = 0
+
+    results = np.empty(9, dtype = str)
+
+    for n in range(n_times):
+        outcome = play_yg()
+        results = np.vstack((results, outcome))
+        common = round(np.count_nonzero(results == 'common'),0)
+        rare = round(np.count_nonzero(results == 'rare'), 0)
+        superc = round(np.count_nonzero(results == 'super'), 0)
+        ultra = round(np.count_nonzero(results == 'ultra'), 0)
+        secret = round(np.count_nonzero(results == 'secret'), 0)
+        ultimate = round(np.count_nonzero(results == 'ultimate'), 0)
+        ghost = round(np.count_nonzero(results == 'ghost'),0)
+
+    return common, rare, superc, ultra, secret, ultimate, ghost
+
+list1 = [] 
+def everyone(n_people): # simulation of a bunch of people opening packs and averaging their outcomes
+    
+    results = 0
+    people = []
+    
+    for n in range(n_people):
+       
+        if str(x) == 'common':
+            receive = perform_simulation(x, n_times)[0]
+        elif str(x) == 'rare':
+             receive = perform_simulation(x, n_times)[1]
+        elif str(x) == 'super':
+             receive = perform_simulation(x, n_times)[2]
+        elif str(x) == 'ultra':
+             receive = perform_simulation(x, n_times)[3]
+        elif str(x) == 'secret':
+             receive = perform_simulation(x, n_times)[4]
+        elif str(x) == 'ultimate':
+             receive = perform_simulation(x, n_times)[5]
+        elif str(x) == 'ghost':
+             receive = perform_simulation(x, n_times)[6]
+        
+        results = results + receive
+
+        mean = np.around(results/(n+1), 0)
+       
+        
+        list1.append(mean)
+        
+        
+        plt.xlabel('Iterations')
+        plt.ylabel('Amount')
+        plt.plot(list1)
+
+    return mean
+
+
+
+answer = everyone(n_people)
+print('amount: ', answer)
+
