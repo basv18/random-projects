@@ -1,3 +1,6 @@
+#This is a Python code
+#I have been doing this in my work breaks, so don't take it as fully finished
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
